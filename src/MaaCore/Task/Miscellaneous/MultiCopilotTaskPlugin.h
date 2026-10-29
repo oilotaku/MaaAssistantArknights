@@ -20,6 +20,7 @@ public:
         std::filesystem::path copilot_file; // 文件名
         std::string nav_name;               // 关卡名
         bool is_raid = false;               // 是否是突袭
+        bool is_practice = false;           // 是否用演习
         int id;
         std::shared_ptr<battle::copilot::OperUsageGroups> assigned_groups;
     };

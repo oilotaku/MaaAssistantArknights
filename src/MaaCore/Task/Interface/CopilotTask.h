@@ -22,8 +22,9 @@ public:
         std::string filename;                         // 文件名
         std::optional<std::string> nav_name_override; // 关卡名
         bool is_raid = false;                         // 是否是突袭
+        bool is_practice = false;                     // 是否用演习(不消耗理智,只验证作业)
 
-        MEO_JSONIZATION(MEO_OPT id, filename, MEO_OPT nav_name_override, MEO_OPT is_raid);
+        MEO_JSONIZATION(MEO_OPT id, filename, MEO_OPT nav_name_override, MEO_OPT is_raid, MEO_OPT is_practice);
     };
 
 public:

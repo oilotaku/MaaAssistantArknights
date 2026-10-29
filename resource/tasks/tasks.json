@@ -4563,6 +4563,15 @@
             "BattleStartOCR"
         ]
     },
+    "CopilotPracticeStart": {
+        "Doc": "抄作业演习:在关卡详情页点「演习」进入编队页(不消耗理智)",
+        "algorithm": "OcrDetect",
+        "text": ["演习"],
+        "roi": [840, 620, 230, 80],
+        "action": "ClickSelf",
+        "preDelay": 500,
+        "postDelay": 1500
+    },
     "BattleStartNormal": {
         "baseTask": "BattleStart"
     },

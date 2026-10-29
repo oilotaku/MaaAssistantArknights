@@ -8,6 +8,7 @@
 #include "Controller/Controller.h"
 #include "Task/Miscellaneous/BattleFormationTask.h"
 #include "Task/Miscellaneous/BattleProcessTask.h"
+#include "Task/Fight/StageNavigationTask.h"
 #include "Task/ProcessTask.h"
 #include "Task/StageNavigationHelper.h"
 #include "Utils/Logger.hpp"
@@ -69,6 +70,10 @@ bool asst::MultiCopilotTaskPlugin::_run()
         // 选择突袭模式
         ret = ret && ProcessTask(*this, { "RaidConfirm", "ChangeToRaidDifficulty" }).set_retry_times(20).run();
     }
+    if (config.is_practice) {
+        // 演习:点「演习」进入编队页,后续 BattleStartPre 找不到开始按钮会被忽略,由 BattleStartExercise 开打
+        ret = ret && ProcessTask(*this, { "CopilotPracticeStart" }).set_retry_times(20).run();
+    }
 
     return ret;
 }
@@ -85,6 +90,19 @@ bool asst::MultiCopilotTaskPlugin::navigate_to_stage(const std::string& stage_na
         return ProcessTask(*this, { stage_name + "@Copilot@StageNavigationByTemplateMatchBegin" })
             .set_retry_times(20)
             .run();
+    }
+
+    // 主线关卡(如 6-15、R8-1、JT8-2):先用刷理智同款的章节导航从任意界面进到对应章节并选中关卡,
+    // 失败再回退到原本只在当前章节地图里找关卡的 OCR 方案
+    if (!stage_name.ends_with("Annihilation")) {
+        StageNavigationTask nav(m_callback, m_inst, m_task_chain);
+        if (nav.set_stage_name(stage_name) && nav.run()) {
+            auto image_nav = ctrler()->get_image();
+            if (is_stage_detail_opened(image_nav) && confirm_stage_name(image_nav, stage_name)) {
+                Log.info("Main stage navigated by StageNavigationTask", stage_name);
+                return true;
+            }
+        }
     }
 
     // 模板不存在，使用基于图像分析的 OCR 方案

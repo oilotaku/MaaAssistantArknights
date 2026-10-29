@@ -132,7 +132,7 @@ bool asst::CopilotTask::set_params(const json::value& params)
         auto configs = static_cast<std::vector<MultiCopilotConfig>>(*multi_tasks_opt);
         std::vector<MultiCopilotTaskPlugin::MultiCopilotConfig> configs_cvt;
         std::unordered_map<std::string, std::shared_ptr<OperUsageGroups>> operbox_assignments;
-        for (const auto& [id, filename, nav_name, is_raid] : configs) {
+        for (const auto& [id, filename, nav_name, is_raid, is_practice] : configs) {
             MultiCopilotTaskPlugin::MultiCopilotConfig config_cvt;
             auto copilot_opt = parse_copilot_filename(filename);
             if (!copilot_opt) {
@@ -171,6 +171,7 @@ bool asst::CopilotTask::set_params(const json::value& params)
             }
             config_cvt.copilot_file = *copilot_opt;
             config_cvt.is_raid = is_raid;
+            config_cvt.is_practice = is_practice;
             config_cvt.id = id; // ID 从0开始
             configs_cvt.emplace_back(std::move(config_cvt));
         }
