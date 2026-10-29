@@ -1,0 +1,49 @@
+name: Build MaaCore (Windows x64, fork)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [copilot-practice]
+    paths: ["src/**", "resource/**", ".github/workflows/build-maacore-win.yml"]
+
+jobs:
+  windows-x64:
+    runs-on: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          show-progress: false
+
+      - name: Fetch submodules
+        shell: bash
+        run: bash ./.github/scripts/sync-optional-submodules.sh --init --depth 1 src/MaaUtils 3rdparty/EmulatorExtras
+
+      - name: Cache MaaDeps
+        id: cache-maadeps
+        uses: actions/cache@v6
+        continue-on-error: true
+        with:
+          path: ./src/MaaUtils/MaaDeps
+          key: ${{ runner.os }}-x64-maadeps-${{ hashFiles('tools/maadeps-download.py') }}
+
+      - name: Bootstrap MaaDeps
+        if: steps.cache-maadeps.outputs.cache-hit != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/maadeps-download.py x64-windows
+
+      - name: Configure, build and install
+        run: |
+          cmake -B build --preset windows-publish-x64 -DMAA_HASH_VERSION='v6.20.1-practice'
+          cmake --build --preset windows-publish-x64 --parallel $env:NUMBER_OF_PROCESSORS
+          cmake --install build --config RelWithDebInfo
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: MaaCore-win-x64-practice
+          path: |
+            install/MaaCore.dll
+            install/*.dll
+            install/resource/tasks/
+            install/resource/global/txwy/resource/tasks/
+            !install/*.pdb
