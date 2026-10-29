@@ -97,7 +97,7 @@ bool asst::MultiCopilotTaskPlugin::navigate_to_stage(const std::string& stage_na
     if (!stage_name.ends_with("Annihilation")) {
         StageNavigationTask nav(m_callback, m_inst, m_task_chain);
         // 章节导航要从终端开始(刷理智前 FightTask 也会先跑 StageBegin 进终端)
-        if (nav.set_stage_name(stage_name) && ProcessTask(*this, { "StageBegin" }).run() && nav.run()) {
+        if (nav.set_stage_name(stage_name) && ProcessTask(*this, { "StageBegin" }).set_times_limit("GoLastBattle", 0).run() && nav.run()) {
             auto image_nav = ctrler()->get_image();
             if (is_stage_detail_opened(image_nav) && confirm_stage_name(image_nav, stage_name)) {
                 Log.info("Main stage navigated by StageNavigationTask", stage_name);
